@@ -1,0 +1,54 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title>Firebase CRUD</title>
+    <!--CDN BOOTSWATCH-->
+    <link rel="stylesheet" href="https://stackpath.bootstrapcdn.com/bootswatch/4.5.0/cyborg/bootstrap.min.css">
+</head>
+<body>
+
+<div class="container p-4">
+    <div class="row">
+        <div class="col-md-4">
+            <div class="card">
+                <div class="card-body">
+                    <form id="task-form">
+                        <div class="form-group">
+                            <input typr="text" id="task-title" class="form-control" placeholder="Title" autofocus>
+                        </div>
+                        <div class="form-group">
+                            <textarea id="task-description" rows="3" class="form-control" placeholder="Description"></textarea>
+                        </div>
+                        <button class="btn btn-primary btn-block" id="btn-send">SEND</button>
+                    </form>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!--FIREBASE-->
+<!-- The core Firebase JS SDK is always required and must be listed first -->
+<script src="https://www.gstatic.com/firebasejs/7.16.0/firebase-app.js"></script>
+
+<!-- Add SDKs for Firebase products that you want to use
+     https://firebase.google.com/docs/web/setup#available-libraries -->
+
+<script>
+  // Your web app's Firebase configuration
+  var firebaseConfig = {
+    apiKey: "AIzaSyBP4xuVU9lvWeoZYA9bfhnaSQpUdRO-9QA",
+    authDomain: "javascript-firebase-crud.firebaseapp.com",
+    databaseURL: "https://javascript-firebase-crud.firebaseio.com",
+    projectId: "javascript-firebase-crud",
+    storageBucket: "javascript-firebase-crud.appspot.com",
+    messagingSenderId: "891176594288",
+    appId: "1:891176594288:web:8437d2609a0a9574dc7db5"
+  };
+  // Initialize Firebase
+  firebase.initializeApp(firebaseConfig);
+</script>
+<!--JAVASCRIPT INDEX.JS-->
+<script src="index.js"></script>
+</body>
+</html>
