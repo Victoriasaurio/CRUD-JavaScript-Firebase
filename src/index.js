@@ -3,7 +3,11 @@ const db = firebase.firestore(); //VARIABLE OBTAINED FROM FIRESTONE
 const taskForm = document.getElementById('task-form');
 const taskContainer = document.getElementById('get-tasks');
 
-//SAVE DATA IN THE DATABASE-FIREBASE
+//Variable que indica el estado del formulario inicial.
+let editStatus = false;
+let id = ''; //ID inicial de la tarea (1)
+
+//FUNCTION FOR SAVE DATA IN THE DATABASE-FIREBASE
 const saveTask = (title, description) =>
     db.collection('tasks').doc().set({
         title,
@@ -21,6 +25,9 @@ const deleteTask = id => db.collection('tasks').doc(id).delete();
 
 //Obteniedo una colección de la base de datos por medio del ID
 const getTaskId = id => db.collection('tasks').doc(id).get();
+
+//Obtiene la colección y la actualiza.
+const updateTask = (id, updatedTask) => db.collection('tasks').doc(id).update(updatedTask);
 
 window.addEventListener('DOMContentLoaded', async(e) => {
     //const querySnapshot = await getTask(); //Obtiene los datos de la BD siempre que se actualice la página.
@@ -50,7 +57,11 @@ window.addEventListener('DOMContentLoaded', async(e) => {
             btnDelete.forEach(btn => {
                 btn.addEventListener('click', async(e) => {
                     //console.log(e.target.dataset.id); //Obtiene el ID de la colección siempre que se presione el botón Delete.
-                    await deleteTask(e.target.dataset.id); //Elimina las colecciones uno por uno
+                    try {
+                        await deleteTask(e.target.dataset.id); //Elimina las colecciones uno por uno
+                    } catch (error) {
+                        console.log(error);
+                    }
                 })
             })
 
@@ -58,26 +69,57 @@ window.addEventListener('DOMContentLoaded', async(e) => {
             const btnEdit = document.querySelectorAll('.btn-edit');
             btnEdit.forEach(btn => {
                 btn.addEventListener('click', async(e) => {
-                    const doc = await getTaskId(e.target.dataset.id);
-                    console.log(doc.data());
+                    try {
+                        const doc = await getTaskId(e.target.dataset.id); //Trae todos los objetos d ela colección
+                        const task = doc.data(); //console.log(doc.data()); //Imprime la info de la colección-objeto
+
+                        taskForm['task-title'].value = task.title; //Imprime los valores en el formulario para poder editarlo
+                        taskForm['task-description'].value = task.description;
+
+                        editStatus = true; //Cambia el estado inicial
+                        id = doc.id; //Guarda el ID de la tarea (1)
+                        taskForm['btnSend'].innerText = "Update"; //Cambia el texto del botón de SEND a UPDATE 
+                    } catch (error) {
+                        console.log(error);
+                    }
                 })
             })
         }); //Recorre el objeto dado por firebase 
     });
 });
 
-taskForm.addEventListener('submit', async(e) => {
-    e.preventDefault();
-    const title = taskForm['task-title'];
-    const description = taskForm['task-description'];
-
-    //RECEIVED DATA FOR SAVE IN THE DB
-    await saveTask(title.value, description.value);
-
-    //Actualizar las lista de tareas siempre que exista cambios
-
+function reset() {
     taskForm.reset();
     title.focus();
+}
 
-    console.log(title, description);
+taskForm.addEventListener('submit', async(e) => {
+    e.preventDefault();
+
+    const title = taskForm['task-title']; //Es el elemento-entero
+    const description = taskForm['task-description'];
+
+    try {
+        if (!editStatus) {
+            //RECEIVED DATA FOR SAVE IN THE DB
+            await saveTask(title.value, description.value);
+
+            reset();
+        } else {
+            //RECEIVED ID AND updateTask(TITLE, DESCRIPTION)
+            await updateTask(id, {
+                    title: title.value,
+                    description: description.value
+                }) //Elemento-valor
+
+            /**Regresa el formulario a su estado inicial después de actualizar un tarea*/
+            editStatus = false;
+            id = '';
+            taskForm['btnSend'].innerText = 'Save';
+
+            reset();
+        }
+    } catch (error) {
+        console.log(error);
+    }
 });
