@@ -2,6 +2,7 @@ const db = firebase.firestore(); //VARIABLE OBTAINED FROM FIRESTONE
 
 const taskForm = document.getElementById('task-form');
 const taskContainer = document.getElementById('get-tasks');
+const taskError = document.getElementById('formError');
 
 //Variable que indica el estado del formulario inicial.
 let editStatus = false;
@@ -29,14 +30,15 @@ const getTaskId = id => db.collection('tasks').doc(id).get();
 //Obtiene la colección y la actualiza.
 const updateTask = (id, updatedTask) => db.collection('tasks').doc(id).update(updatedTask);
 
+//Agrega información cuando la ventana es recargada --> ||window.addEventListener('DOMContentLoaded'|| (e)son los eventos
 window.addEventListener('DOMContentLoaded', async(e) => {
     //const querySnapshot = await getTask(); //Obtiene los datos de la BD siempre que se actualice la página.
-    //querySnapshot -> Contiene toda la colección de datos de la BD
+    //querySnapshot -> Contiene toda la colección de datos de la BD. Es un OBJETO que puede ser RECORRIDO
 
     //Actualiza los datos que se muestran en pantalla al instante
     onGetTasks((querySnapshot) => {
         taskContainer.innerHTML = ''; //Limpia el contenedor con los datos
-        querySnapshot.forEach(doc => {
+        querySnapshot.forEach(doc => { //FOREACH recorre un objeto.
             console.log(doc.data()); //Muestra la colección de datos de manera legible
 
             const task = doc.data();
@@ -88,9 +90,16 @@ window.addEventListener('DOMContentLoaded', async(e) => {
     });
 });
 
+/**FUNCTIONS */
 function reset() {
     taskForm.reset();
     title.focus();
+}
+
+function alertTime() {
+    setTimeout(function() {
+        document.querySelector('.alert').remove();
+    }, 2000);
 }
 
 taskForm.addEventListener('submit', async(e) => {
@@ -102,9 +111,25 @@ taskForm.addEventListener('submit', async(e) => {
     try {
         if (!editStatus) {
             //RECEIVED DATA FOR SAVE IN THE DB
-            await saveTask(title.value, description.value);
+            if (title.value === '' && description.value === '') {
+                taskError.innerHTML += (`
+                <div class="alert alert-danger">
+                    Form invalid.
+                </div>`);
 
-            reset();
+                alertTime();
+            } else if (title.value === '' || description.value === '') {
+                taskError.innerHTML += (`
+                <div class="alert alert-danger">
+                    Form invalid.
+                </div>`);
+
+                alertTime();
+            } else {
+                await saveTask(title.value, description.value);
+
+                reset();
+            }
         } else {
             //RECEIVED ID AND updateTask(TITLE, DESCRIPTION)
             await updateTask(id, {
